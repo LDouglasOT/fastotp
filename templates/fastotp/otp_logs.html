@@ -1,0 +1,97 @@
+{% extends 'fastotp/dashboard_base.html' %}
+{% block page_title %}OTP Logs{% endblock %}
+
+{% block dashboard_content %}
+<div class="mb-6 flex items-center justify-between">
+  <div>
+    <h1 class="font-display font-700 text-2xl text-slate-900">OTP Delivery Logs</h1>
+    <p class="text-slate-500 text-sm mt-1">Real-time log of all OTP sends from your account</p>
+  </div>
+  <div class="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl">
+    <span class="w-2 h-2 bg-lime-400 rounded-full animate-pulse"></span>
+    Auto-refreshing every 10s
+  </div>
+</div>
+
+<!-- Filter bar -->
+<div class="glass rounded-2xl p-4 mb-6 flex flex-wrap gap-3 border border-slate-200" x-data="{filter:'all'}">
+  <button @click="filter='all'" :class="filter==='all'?'bg-emerald-600 text-white shadow-sm':'bg-white text-slate-600 border border-slate-200'" class="text-xs px-4 py-1.5 rounded-xl font-600 transition-all">All</button>
+  <button @click="filter='delivered'" :class="filter==='delivered'?'bg-emerald-600 text-white shadow-sm':'bg-white text-slate-600 border border-slate-200'" class="text-xs px-4 py-1.5 rounded-xl font-600 transition-all">Delivered</button>
+  <button @click="filter='pending'" :class="filter==='pending'?'bg-amber-500 text-white shadow-sm':'bg-white text-slate-600 border border-slate-200'" class="text-xs px-4 py-1.5 rounded-xl font-600 transition-all">Pending</button>
+  <button @click="filter='failed'" :class="filter==='failed'?'bg-red-500 text-white shadow-sm':'bg-white text-slate-600 border border-slate-200'" class="text-xs px-4 py-1.5 rounded-xl font-600 transition-all">Failed</button>
+</div>
+
+<!-- Live logs table -->
+<div class="glass rounded-3xl overflow-hidden border border-slate-200">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-slate-100 bg-slate-50/80">
+          <th class="text-left px-6 py-3.5 text-xs font-600 text-slate-400 uppercase tracking-wider">Identifier</th>
+          <th class="text-left px-6 py-3.5 text-xs font-600 text-slate-400 uppercase tracking-wider">Channel</th>
+          <th class="text-left px-6 py-3.5 text-xs font-600 text-slate-400 uppercase tracking-wider">Country</th>
+          <th class="text-left px-6 py-3.5 text-xs font-600 text-slate-400 uppercase tracking-wider">Status</th>
+          <th class="text-left px-6 py-3.5 text-xs font-600 text-slate-400 uppercase tracking-wider">Latency</th>
+          <th class="text-left px-6 py-3.5 text-xs font-600 text-slate-400 uppercase tracking-wider">Cost</th>
+          <th class="text-left px-6 py-3.5 text-xs font-600 text-slate-400 uppercase tracking-wider">Time</th>
+        </tr>
+      </thead>
+      <tbody id="log-table-body"
+             hx-get="{% url 'otp_logs_poll' %}"
+             hx-trigger="every 10s"
+             hx-swap="innerHTML">
+        {% for log in logs %}
+        <tr class="border-b border-slate-50 hover:bg-emerald-50/30 transition-colors">
+          <td class="px-6 py-4">
+            <span class="font-mono text-sm text-slate-700">{{ log.identifier }}</span>
+          </td>
+          <td class="px-6 py-4">
+            <span class="flex items-center gap-1.5 text-xs font-600 text-slate-600">
+              {% if log.channel == 'whatsapp' %}💬{% elif log.channel == 'sms' %}📱{% elif log.channel == 'voice' %}📞{% else %}📧{% endif %}
+              {{ log.channel|title }}
+            </span>
+          </td>
+          <td class="px-6 py-4">
+            <span class="text-xs text-slate-500">{{ log.country_name|default:"—" }}</span>
+          </td>
+          <td class="px-6 py-4">
+            {% if log.status == 'delivered' or log.status == 'verified' %}
+            <span class="inline-flex items-center gap-1 text-xs font-600 bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-0.5 rounded-full">✓ {{ log.status }}</span>
+            {% elif log.status == 'pending' or log.status == 'sent' %}
+            <span class="inline-flex items-center gap-1 text-xs font-600 shimmer-pending border border-amber-200 text-amber-700 px-2.5 py-0.5 rounded-full">
+              <span class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></span>{{ log.status }}
+            </span>
+            {% elif log.status == 'failed' %}
+            <span class="inline-flex items-center gap-1 text-xs font-600 bg-red-50 text-red-600 border border-red-100 px-2.5 py-0.5 rounded-full">✕ failed</span>
+            {% else %}
+            <span class="text-xs text-slate-400">{{ log.status }}</span>
+            {% endif %}
+          </td>
+          <td class="px-6 py-4">
+            {% if log.latency_ms %}
+            <span class="font-mono text-xs font-600 {% if log.latency_ms < 500 %}text-lime-700{% elif log.latency_ms < 1000 %}text-amber-600{% else %}text-red-500{% endif %}">
+              {{ log.latency_ms }}ms
+            </span>
+            {% else %}<span class="text-slate-300 text-xs">—</span>{% endif %}
+          </td>
+          <td class="px-6 py-4">
+            <span class="font-mono text-xs text-slate-500">${{ log.cost_credits|floatformat:4 }}</span>
+          </td>
+          <td class="px-6 py-4">
+            <span class="text-xs text-slate-400">{{ log.created_at|timesince }} ago</span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center py-16 text-slate-400">
+            <div class="text-4xl mb-3">📭</div>
+            <p class="text-sm">No OTP logs yet.</p>
+            <p class="text-xs mt-1"><a href="{% url 'seed_demo' %}" class="text-emerald-600">Load demo data</a> to see the UI in action.</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

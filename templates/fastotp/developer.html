@@ -1,0 +1,131 @@
+{% extends 'fastotp/dashboard_base.html' %}
+{% block page_title %}API Keys{% endblock %}
+
+{% block dashboard_content %}
+<div class="max-w-4xl">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="font-display font-700 text-2xl text-slate-900">Developer Tools</h1>
+      <p class="text-slate-500 text-sm mt-1">Manage your API keys and integration settings</p>
+    </div>
+    <!-- Generate key modal trigger -->
+    <button onclick="document.getElementById('new-key-modal').showModal()"
+            class="btn-push flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-600 px-5 py-2.5 rounded-xl shadow-sm hover:shadow-glow transition-all">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New API Key
+    </button>
+  </div>
+
+  <!-- Base URL card -->
+  <div class="glass rounded-3xl p-6 border border-slate-200 mb-6">
+    <p class="text-xs font-600 text-slate-400 uppercase tracking-wider mb-3">Base URL</p>
+    <div class="flex items-center gap-3 bg-slate-50 rounded-2xl p-4 border border-slate-100"
+         x-data="{copied:false}">
+      <code class="font-mono text-sm text-emerald-700 flex-1 select-all">https://api.fastotp.co/v1</code>
+      <button @click="navigator.clipboard.writeText('https://api.fastotp.co/v1'); copied=true; setTimeout(()=>copied=false,2000)"
+              class="btn-push text-xs bg-slate-200 hover:bg-emerald-100 text-slate-700 hover:text-emerald-700 px-3 py-1.5 rounded-lg transition-all font-medium">
+        <span x-show="!copied">Copy</span>
+        <span x-show="copied" class="text-emerald-600">✓ Copied</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- API Keys list -->
+  <div class="glass rounded-3xl overflow-hidden border border-slate-200">
+    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+      <h3 class="font-display font-600 text-slate-800">Your API Keys</h3>
+    </div>
+
+    <div id="api-keys-list" class="divide-y divide-slate-50">
+      {% for key in api_keys %}
+        {% include 'fastotp/partials/api_key_row.html' with key=key %}
+      {% empty %}
+      <div class="text-center py-12 text-slate-400">
+        <div class="text-4xl mb-3">🔑</div>
+        <p class="text-sm font-medium text-slate-600 mb-1">No API keys yet</p>
+        <p class="text-xs">Generate your first key to start sending OTPs</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Code examples -->
+  <div class="mt-8 glass rounded-3xl overflow-hidden border border-slate-200">
+    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-4">
+      <h3 class="font-display font-600 text-slate-800">Quick Reference</h3>
+    </div>
+    <div class="p-6">
+      <p class="text-xs font-600 text-slate-400 uppercase tracking-wider mb-3">Send OTP</p>
+      <pre class="bg-slate-900 rounded-2xl p-5 text-sm font-mono text-slate-200 overflow-x-auto leading-relaxed"><code><span class="text-slate-400">POST</span> <span class="text-lime-300">https://api.fastotp.co/v1/send</span>
+
+<span class="text-slate-400">Headers:</span>
+  Authorization: Bearer <span class="text-amber-300">fotk_live_your_key</span>
+  Content-Type: application/json
+
+<span class="text-slate-400">Body:</span>
+{
+  <span class="text-blue-300">"identifier"</span>: <span class="text-green-300">"+234801234567"</span>,
+  <span class="text-blue-300">"channel"</span>: <span class="text-green-300">"whatsapp"</span>,
+  <span class="text-blue-300">"expires_in"</span>: <span class="text-purple-300">300</span>
+}
+
+<span class="text-slate-400">Response:</span>
+{
+  <span class="text-blue-300">"success"</span>: <span class="text-green-300">true</span>,
+  <span class="text-blue-300">"otp_id"</span>: <span class="text-green-300">"abc_123"</span>,
+  <span class="text-blue-300">"latency_ms"</span>: <span class="text-purple-300">342</span>
+}</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- New API Key Modal -->
+<dialog id="new-key-modal" class="rounded-3xl shadow-2xl border border-slate-200 p-0 backdrop:bg-slate-900/60 w-full max-w-md">
+  <div class="p-8">
+    <h3 class="font-display font-700 text-xl text-slate-900 mb-5">Generate New API Key</h3>
+    <form hx-post="{% url 'generate_key' %}"
+          hx-target="#api-keys-list"
+          hx-swap="afterbegin"
+          @htmx:afterRequest="document.getElementById('new-key-modal').close()">
+      {% csrf_token %}
+      <div class="mb-5">
+        <label class="block text-xs font-600 text-slate-600 mb-1.5">Key Name</label>
+        <input type="text" name="name" placeholder="e.g. Production App, Staging"
+               class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white transition-all" required>
+      </div>
+      <div class="mb-7">
+        <label class="block text-xs font-600 text-slate-600 mb-2">Environment</label>
+        <div class="grid grid-cols-2 gap-3" x-data="{env:'test'}">
+          <label class="relative">
+            <input type="radio" name="environment" value="test" class="sr-only" x-model="env" checked>
+            <div :class="env==='test' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200'"
+                 class="border-2 rounded-xl p-3.5 cursor-pointer transition-all">
+              <p class="text-xs font-600 text-slate-700">Test</p>
+              <p class="text-xs text-slate-400 mt-0.5">For development</p>
+            </div>
+          </label>
+          <label class="relative">
+            <input type="radio" name="environment" value="live" class="sr-only" x-model="env">
+            <div :class="env==='live' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200'"
+                 class="border-2 rounded-xl p-3.5 cursor-pointer transition-all">
+              <p class="text-xs font-600 text-slate-700">Live</p>
+              <p class="text-xs text-slate-400 mt-0.5">Real OTP delivery</p>
+            </div>
+          </label>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button type="button" onclick="document.getElementById('new-key-modal').close()"
+                class="flex-1 border border-slate-200 text-slate-600 py-3 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">
+          Cancel
+        </button>
+        <button type="submit"
+                class="btn-push flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-sm font-600 shadow-sm hover:shadow-glow transition-all">
+          Generate Key
+        </button>
+      </div>
+    </form>
+  </div>
+</dialog>
+{% endblock %}

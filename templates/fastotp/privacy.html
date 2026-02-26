@@ -1,0 +1,63 @@
+{% extends 'fastotp/base.html' %}
+{% block title %}Privacy Policy — FastOTP{% endblock %}
+
+{% block content %}
+<main class="pt-16">
+  <div class="max-w-3xl mx-auto px-6 py-20">
+    <!-- Hero -->
+    <div class="mb-14">
+      <p class="text-xs font-mono text-emerald-600 tracking-wider uppercase mb-3">Last updated: January 2025</p>
+      <h1 class="font-display text-5xl font-700 text-slate-900 mb-5">Privacy Policy</h1>
+      <p class="text-lg text-slate-500 leading-relaxed">We believe privacy is a right, not a feature. Here's exactly what data we collect, why, and how we protect it.</p>
+    </div>
+
+    <!-- Content -->
+    <div class="prose-content space-y-10 text-slate-600 leading-relaxed">
+
+      <section class="glass rounded-3xl p-8 border border-slate-100">
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">1. Data We Collect</h2>
+        <p class="mb-4">We collect only what's strictly necessary to provide the FastOTP service:</p>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3"><span class="w-2 h-2 bg-emerald-500 rounded-full mt-1.5 flex-shrink-0"></span><span><strong class="text-slate-800">Account data:</strong> Name, email address, company name, WhatsApp number for identity verification.</span></li>
+          <li class="flex items-start gap-3"><span class="w-2 h-2 bg-emerald-500 rounded-full mt-1.5 flex-shrink-0"></span><span><strong class="text-slate-800">Delivery logs:</strong> Phone numbers or emails you send OTPs to, the delivery status, and latency — necessary to provide the service and troubleshoot issues.</span></li>
+          <li class="flex items-start gap-3"><span class="w-2 h-2 bg-emerald-500 rounded-full mt-1.5 flex-shrink-0"></span><span><strong class="text-slate-800">Billing data:</strong> Payment method information is handled entirely by Paystack or Flutterwave. We never store card numbers.</span></li>
+          <li class="flex items-start gap-3"><span class="w-2 h-2 bg-emerald-500 rounded-full mt-1.5 flex-shrink-0"></span><span><strong class="text-slate-800">Usage data:</strong> API request logs, IP addresses, and user agents for security and rate limiting.</span></li>
+        </ul>
+      </section>
+
+      <section class="glass rounded-3xl p-8 border border-slate-100">
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">2. How We Use Your Data</h2>
+        <p>Your data is used exclusively to:</p>
+        <ul class="space-y-2 mt-3">
+          <li class="flex items-start gap-3"><span class="w-2 h-2 bg-lime-400 rounded-full mt-1.5 flex-shrink-0"></span><span>Deliver OTPs you initiate through the API</span></li>
+          <li class="flex items-start gap-3"><span class="w-2 h-2 bg-lime-400 rounded-full mt-1.5 flex-shrink-0"></span><span>Generate your usage reports and billing statements</span></li>
+          <li class="flex items-start gap-3"><span class="w-2 h-2 bg-lime-400 rounded-full mt-1.5 flex-shrink-0"></span><span>Detect and prevent abuse of the platform</span></li>
+          <li class="flex items-start gap-3"><span class="w-2 h-2 bg-lime-400 rounded-full mt-1.5 flex-shrink-0"></span><span>Send transactional emails (password reset, low credit alerts)</span></li>
+        </ul>
+        <p class="mt-4 font-600 text-slate-800">We do not sell, rent, or trade your data to any third party.</p>
+      </section>
+
+      <section class="glass rounded-3xl p-8 border border-slate-100">
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">3. Data Retention</h2>
+        <p>OTP delivery logs are retained for <strong class="text-slate-800">90 days</strong> by default for debugging and analytics. You may request earlier deletion via our support channel. Account data is retained until you delete your account.</p>
+      </section>
+
+      <section class="glass rounded-3xl p-8 border border-slate-100">
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">4. Your Rights</h2>
+        <p>Under applicable data protection laws (NDPR, GDPR), you have the right to access, correct, export, or delete your personal data. Contact <a href="mailto:privacy@fastotp.co" class="text-emerald-600 hover:text-emerald-700 font-medium">privacy@fastotp.co</a> to exercise these rights.</p>
+      </section>
+
+      <section class="glass rounded-3xl p-8 border border-slate-100">
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">5. Security</h2>
+        <p>All data is encrypted in transit (TLS 1.3) and at rest (AES-256). OTPs are stored as one-way hashes — we cannot recover the original OTP. API keys are generated with 256 bits of entropy.</p>
+      </section>
+
+      <section class="glass rounded-3xl p-8 border border-slate-100">
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">6. Contact</h2>
+        <p>For privacy concerns: <a href="mailto:privacy@fastotp.co" class="text-emerald-600 hover:text-emerald-700 font-medium">privacy@fastotp.co</a><br>
+        Data Protection Officer: <a href="mailto:dpo@fastotp.co" class="text-emerald-600 hover:text-emerald-700 font-medium">dpo@fastotp.co</a></p>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,11 @@
+<!-- credit_balance.html — HTMX polling partial -->
+<div id="credit-badge"
+     hx-get="{% url 'credit_balance_poll' %}"
+     hx-trigger="every 30s"
+     hx-swap="outerHTML"
+     class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
+  <span class="w-2 h-2 bg-lime-400 rounded-full animate-pulse"></span>
+  <span class="text-xs font-mono font-600 text-emerald-700">
+    {{ balance.balance|floatformat:2 }} credits
+  </span>
+</div>

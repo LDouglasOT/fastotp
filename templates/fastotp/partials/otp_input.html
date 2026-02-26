@@ -1,0 +1,124 @@
+<div id="otp-section" x-data="otpTimer({{ expires_seconds }})" x-init="start()">
+  <!-- Demo hint (remove in production) -->
+  <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 mb-6 flex items-start gap-3">
+    <span class="text-lg">🔬</span>
+    <div>
+      <p class="text-xs font-600 text-amber-700">Demo Mode</p>
+      <p class="text-xs text-amber-600">Your OTP is: <span class="font-mono font-700 tracking-widest text-amber-800">{{ demo_otp }}</span></p>
+    </div>
+  </div>
+
+  <p class="text-sm text-slate-600 text-center mb-5">Enter the 6-digit code sent to your WhatsApp</p>
+
+  <!-- OTP Digit Inputs -->
+  <div class="flex justify-center gap-2 mb-6" id="otp-inputs"
+       x-on:keyup="handleKey($event)">
+    <input type="text" name="d1" maxlength="1" inputmode="numeric" pattern="[0-9]"
+           class="otp-digit" autocomplete="one-time-code"
+           data-index="1"
+           x-on:input="advance($event, 2)">
+    <input type="text" name="d2" maxlength="1" inputmode="numeric" pattern="[0-9]"
+           class="otp-digit" data-index="2"
+           x-on:input="advance($event, 3)">
+    <input type="text" name="d3" maxlength="1" inputmode="numeric" pattern="[0-9]"
+           class="otp-digit" data-index="3"
+           x-on:input="advance($event, 4)">
+    <input type="text" name="d4" maxlength="1" inputmode="numeric" pattern="[0-9]"
+           class="otp-digit" data-index="4"
+           x-on:input="advance($event, 5)">
+    <input type="text" name="d5" maxlength="1" inputmode="numeric" pattern="[0-9]"
+           class="otp-digit" data-index="5"
+           x-on:input="advance($event, 6)">
+    <input type="text" name="d6" maxlength="1" inputmode="numeric" pattern="[0-9]"
+           class="otp-digit" data-index="6"
+           x-on:input="advanceLast($event)">
+  </div>
+
+  <!-- Countdown -->
+  <div class="flex items-center justify-center gap-2 mb-6">
+    <div class="w-4 h-4 text-lime-600">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+    </div>
+    <span class="text-sm font-mono font-600" :class="seconds < 60 ? 'text-red-500' : 'text-lime-700'">
+      <span x-text="formatTime(seconds)"></span> remaining
+    </span>
+  </div>
+
+  <!-- Verify button -->
+  <button id="verify-btn"
+    hx-post="{% url 'verify_signup_otp' %}"
+    hx-target="#verification-container"
+    hx-swap="innerHTML"
+    hx-include="#otp-inputs input"
+    hx-indicator="#verify-spinner"
+    class="btn-push w-full bg-emerald-600 hover:bg-emerald-700 text-white font-600 py-3.5 rounded-2xl shadow-sm hover:shadow-glow transition-all flex items-center justify-center gap-2 text-sm"
+    :disabled="!allFilled">
+    <svg class="w-4 h-4 htmx-indicator animate-spin" id="verify-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+    <span>Verify Code</span>
+  </button>
+
+  <p class="text-center text-xs text-slate-400 mt-4">
+    Didn't get it?
+    <button x-show="seconds <= 0" class="text-emerald-600 font-medium"
+            hx-post="{% url 'send_signup_otp' %}"
+            hx-target="#otp-section"
+            hx-swap="outerHTML">
+      Resend
+    </button>
+    <span x-show="seconds > 0" class="text-slate-400">Resend in <span x-text="seconds" class="font-mono"></span>s</span>
+  </p>
+</div>
+
+<script>
+function otpTimer(seconds) {
+  return {
+    seconds: seconds,
+    allFilled: false,
+    interval: null,
+
+    start() {
+      this.interval = setInterval(() => {
+        if (this.seconds > 0) this.seconds--;
+        else clearInterval(this.interval);
+      }, 1000);
+    },
+
+    formatTime(s) {
+      const m = Math.floor(s / 60);
+      const sec = s % 60;
+      return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+    },
+
+    advance(event, nextIndex) {
+      const val = event.target.value;
+      if (val && val.match(/[0-9]/)) {
+        const next = document.querySelector(`.otp-digit[data-index="${nextIndex}"]`);
+        if (next) next.focus();
+      }
+      this.checkFilled();
+    },
+
+    advanceLast(event) {
+      this.checkFilled();
+      if (this.allFilled) document.getElementById('verify-btn')?.focus();
+    },
+
+    checkFilled() {
+      const inputs = document.querySelectorAll('.otp-digit');
+      this.allFilled = Array.from(inputs).every(i => i.value.match(/[0-9]/));
+    },
+
+    handleKey(event) {
+      if (event.key === 'Backspace' && !event.target.value) {
+        const idx = parseInt(event.target.dataset.index);
+        if (idx > 1) {
+          const prev = document.querySelector(`.otp-digit[data-index="${idx-1}"]`);
+          if (prev) { prev.value = ''; prev.focus(); }
+        }
+      }
+    }
+  };
+}
+</script>

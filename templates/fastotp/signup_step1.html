@@ -1,0 +1,123 @@
+{% extends 'fastotp/base.html' %}
+{% block title %}Create Account — FastOTP{% endblock %}
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-slate-100 flex items-center justify-center p-4">
+
+  <!-- Background orb -->
+  <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-300/20 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-lime-300/20 rounded-full blur-3xl"></div>
+  </div>
+
+  <div class="w-full max-w-xl">
+    <!-- Logo -->
+    <div class="flex items-center justify-center gap-2 mb-8">
+      <div class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center shadow-glow">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.56 3.56 2 2 0 0 1 3.53 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.5A16 16 0 0 0 16 16.59l.87-.88a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <span class="font-display font-700 text-xl text-slate-900">FastOTP</span>
+    </div>
+
+    <!-- Step indicator -->
+    <div class="flex items-center justify-center gap-3 mb-8">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold">1</div>
+        <span class="text-xs font-medium text-emerald-700">Account</span>
+      </div>
+      <div class="flex-1 max-w-16 h-px bg-slate-200"></div>
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 text-xs font-bold">2</div>
+        <span class="text-xs text-slate-400">Verify</span>
+      </div>
+    </div>
+
+    <div class="glass rounded-3xl p-8 shadow-xl border border-white/70">
+      <h1 class="font-display text-2xl font-700 text-slate-900 mb-1">Create your account</h1>
+      <p class="text-slate-500 text-sm mb-8">Start with 5 free OTP credits — no card needed.</p>
+
+      <form method="POST" action="{% url 'signup' %}" x-data="{loading:false}" @submit="loading=true">
+        {% csrf_token %}
+
+        <!-- Name row -->
+        <div class="grid grid-cols-2 gap-4 mb-5">
+          <div>
+            <label class="block text-xs font-600 text-slate-600 mb-1.5">First name</label>
+            <input type="text" name="first_name" value="{{ form.first_name|default:'' }}"
+                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white/80 transition-all"
+                   placeholder="Ada">
+            {% if errors.first_name %}<p class="text-red-500 text-xs mt-1">{{ errors.first_name }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="block text-xs font-600 text-slate-600 mb-1.5">Last name</label>
+            <input type="text" name="last_name" value="{{ form.last_name|default:'' }}"
+                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white/80 transition-all"
+                   placeholder="Obi">
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-5">
+          <label class="block text-xs font-600 text-slate-600 mb-1.5">Email address</label>
+          <input type="email" name="email" value="{{ form.email|default:'' }}" required
+                 class="w-full px-4 py-3 rounded-xl border {% if errors.email %}border-red-400{% else %}border-slate-200{% endif %} focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white/80 transition-all"
+                 placeholder="ada@yourcompany.com">
+          {% if errors.email %}<p class="text-red-500 text-xs mt-1">{{ errors.email }}</p>{% endif %}
+        </div>
+
+        <!-- Company -->
+        <div class="mb-5">
+          <label class="block text-xs font-600 text-slate-600 mb-1.5">Company name <span class="text-slate-400 font-normal">(optional)</span></label>
+          <input type="text" name="company_name" value="{{ form.company_name|default:'' }}"
+                 class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white/80 transition-all"
+                 placeholder="Paystack, Flutterwave, etc.">
+        </div>
+
+        <!-- WhatsApp -->
+        <div class="mb-5">
+          <label class="block text-xs font-600 text-slate-600 mb-1.5">WhatsApp number <span class="text-emerald-600 text-xs">— for verification</span></label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">💬</span>
+            <input type="tel" name="whatsapp_number" value="{{ form.whatsapp_number|default:'' }}" required
+                   class="w-full pl-10 pr-4 py-3 rounded-xl border {% if errors.whatsapp_number %}border-red-400{% else %}border-slate-200{% endif %} focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white/80 transition-all font-mono"
+                   placeholder="+234 801 234 5678">
+          </div>
+          {% if errors.whatsapp_number %}<p class="text-red-500 text-xs mt-1">{{ errors.whatsapp_number }}</p>{% endif %}
+        </div>
+
+        <!-- Password -->
+        <div class="grid grid-cols-2 gap-4 mb-7">
+          <div>
+            <label class="block text-xs font-600 text-slate-600 mb-1.5">Password</label>
+            <input type="password" name="password" required minlength="8"
+                   class="w-full px-4 py-3 rounded-xl border {% if errors.password %}border-red-400{% else %}border-slate-200{% endif %} focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white/80 transition-all"
+                   placeholder="Min 8 chars">
+            {% if errors.password %}<p class="text-red-500 text-xs mt-1">{{ errors.password }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="block text-xs font-600 text-slate-600 mb-1.5">Confirm password</label>
+            <input type="password" name="password2" required
+                   class="w-full px-4 py-3 rounded-xl border {% if errors.password2 %}border-red-400{% else %}border-slate-200{% endif %} focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white/80 transition-all"
+                   placeholder="Repeat">
+            {% if errors.password2 %}<p class="text-red-500 text-xs mt-1">{{ errors.password2 }}</p>{% endif %}
+          </div>
+        </div>
+
+        <button type="submit" :disabled="loading"
+                class="btn-push w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-70 text-white font-600 py-3.5 rounded-2xl shadow-sm hover:shadow-glow transition-all flex items-center justify-center gap-2 text-sm">
+          <span x-show="!loading">Continue to Verification →</span>
+          <span x-show="loading" class="flex items-center gap-2">
+            <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            Saving...
+          </span>
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-slate-500 mt-6">
+        Already have an account? <a href="{% url 'login' %}" class="text-emerald-600 font-medium hover:text-emerald-700">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

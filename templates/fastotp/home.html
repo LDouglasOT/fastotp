@@ -1,0 +1,235 @@
+{% extends 'fastotp/base.html' %}
+{% block title %}FastOTP — Africa's Fastest OTP Delivery{% endblock %}
+
+{% block content %}
+<main class="pt-16">
+
+  <!-- ── HERO ─────────────────────────────────────── -->
+  <section class="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900">
+
+    <!-- Background grid -->
+    <div class="absolute inset-0 opacity-10"
+         style="background-image: linear-gradient(rgba(5,150,105,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(5,150,105,0.3) 1px, transparent 1px); background-size: 60px 60px;"></div>
+
+    <!-- Gradient orbs -->
+    <div class="absolute top-20 right-10 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-20 left-10 w-80 h-80 bg-lime-400/10 rounded-full blur-3xl"></div>
+
+    <!-- Africa Map Pulse SVG -->
+    <div class="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-full max-w-2xl opacity-25 pointer-events-none hidden lg:block">
+      <svg viewBox="0 0 500 600" class="w-full h-full" fill="none">
+        <!-- Simplified Africa outline -->
+        <path d="M 200 40 L 260 38 L 310 55 L 340 80 L 360 120 L 370 160 L 360 200 L 380 240 L 390 290 L 380 350 L 350 400 L 310 440 L 270 470 L 230 480 L 190 470 L 155 445 L 130 410 L 115 370 L 110 320 L 120 270 L 130 230 L 120 190 L 130 150 L 150 110 L 165 75 Z"
+              stroke="#34d399" stroke-width="2" fill="rgba(5,150,105,0.08)"/>
+
+        <!-- Pulse dots on key countries -->
+        <g class="map-pulse" style="animation-delay:0s">
+          <circle cx="245" cy="280" r="6" fill="#bef264"/>
+          <circle cx="245" cy="280" r="12" fill="none" stroke="#bef264" stroke-width="1.5" opacity="0.5"/>
+        </g>
+        <g class="map-pulse" style="animation-delay:0.4s">
+          <circle cx="290" cy="310" r="5" fill="#34d399"/>
+          <circle cx="290" cy="310" r="10" fill="none" stroke="#34d399" stroke-width="1.5" opacity="0.5"/>
+        </g>
+        <g class="map-pulse" style="animation-delay:0.8s">
+          <circle cx="225" cy="350" r="5" fill="#34d399"/>
+          <circle cx="225" cy="350" r="10" fill="none" stroke="#34d399" stroke-width="1" opacity="0.5"/>
+        </g>
+        <g class="map-pulse" style="animation-delay:1.2s">
+          <circle cx="195" cy="200" r="4" fill="#bef264"/>
+          <circle cx="195" cy="200" r="8" fill="none" stroke="#bef264" stroke-width="1" opacity="0.5"/>
+        </g>
+        <g class="map-pulse" style="animation-delay:0.6s">
+          <circle cx="260" cy="170" r="4" fill="#34d399"/>
+        </g>
+        <g class="map-pulse" style="animation-delay:1.6s">
+          <circle cx="310" cy="250" r="4" fill="#34d399"/>
+        </g>
+        <g class="map-pulse" style="animation-delay:2s">
+          <circle cx="180" cy="300" r="4" fill="#bef264"/>
+        </g>
+
+        <!-- Connection lines -->
+        <line x1="245" y1="280" x2="290" y2="310" stroke="#34d399" stroke-width="0.8" opacity="0.4" stroke-dasharray="4 3"/>
+        <line x1="245" y1="280" x2="225" y2="350" stroke="#34d399" stroke-width="0.8" opacity="0.4" stroke-dasharray="4 3"/>
+        <line x1="245" y1="280" x2="195" y2="200" stroke="#bef264" stroke-width="0.8" opacity="0.4" stroke-dasharray="4 3"/>
+      </svg>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="relative max-w-7xl mx-auto px-6 py-24 z-10">
+      <div class="max-w-2xl">
+        <!-- Badge -->
+        <div class="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-medium px-4 py-1.5 rounded-full mb-8">
+          <span class="w-1.5 h-1.5 bg-lime-400 rounded-full animate-pulse"></span>
+          Live across 24+ African countries
+        </div>
+
+        <h1 class="font-display text-5xl sm:text-6xl lg:text-7xl font-800 text-white leading-[1.05] mb-8">
+          OTP delivery so fast,<br>
+          <span class="text-gradient">it feels like it happened<br>before you clicked.</span>
+        </h1>
+
+        <p class="text-lg text-slate-300 leading-relaxed mb-10 max-w-lg">
+          Sub-second OTP delivery via WhatsApp, SMS, and Voice to every corner of Africa. Built for developers who refuse to settle for slow.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="{% url 'signup' %}" class="btn-push group bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold px-8 py-4 rounded-2xl shadow-glow hover:shadow-glow-lime transition-all text-center flex items-center justify-center gap-2">
+            Start Sending Free
+            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="{% url 'coverage' %}" class="btn-push border border-emerald-600/50 text-emerald-300 hover:bg-emerald-900/30 font-semibold px-8 py-4 rounded-2xl transition-all text-center">
+            View Coverage & Rates
+          </a>
+        </div>
+
+        <!-- Micro stats -->
+        <div class="flex flex-wrap gap-8 mt-14 pt-10 border-t border-white/10">
+          <div>
+            <p class="font-display font-700 text-3xl text-white">{{ stats.otps_sent }}</p>
+            <p class="text-xs text-slate-400 mt-0.5">OTPs sent</p>
+          </div>
+          <div>
+            <p class="font-display font-700 text-3xl text-white">{{ stats.countries }}</p>
+            <p class="text-xs text-slate-400 mt-0.5">Countries covered</p>
+          </div>
+          <div>
+            <p class="font-display font-700 text-3xl text-lime-300">{{ stats.avg_latency }}</p>
+            <p class="text-xs text-slate-400 mt-0.5">Avg. delivery time</p>
+          </div>
+          <div>
+            <p class="font-display font-700 text-3xl text-white">{{ stats.uptime }}</p>
+            <p class="text-xs text-slate-400 mt-0.5">Uptime SLA</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating OTP card preview -->
+    <div class="absolute bottom-10 right-8 hidden xl:block animate-float">
+      <div class="glass rounded-2xl p-5 w-72 shadow-xl border border-white/20">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-mono text-slate-500">live delivery</span>
+          <span class="w-2 h-2 bg-lime-400 rounded-full animate-pulse"></span>
+        </div>
+        <div class="flex gap-2 mb-4">
+          {% for d in "123456" %}
+          <div class="w-10 h-10 bg-emerald-50 border-2 border-emerald-200 rounded-xl flex items-center justify-center font-mono font-700 text-emerald-800 text-lg">{{ d }}</div>
+          {% endfor %}
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-xs">🇳🇬</span>
+          <div>
+            <p class="text-xs font-medium text-slate-700">+234 801 *** **34</p>
+            <p class="text-xs text-emerald-600 font-mono">delivered in 342ms ✓</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ───────────────────────────── -->
+  <section class="py-24 max-w-7xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <p class="text-xs font-mono text-emerald-600 tracking-wider uppercase mb-3">Simple by design</p>
+      <h2 class="font-display text-4xl font-700 text-slate-900">Three lines of code to OTP</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {% for step in "123" %}
+      <div class="glass rounded-3xl p-8 hover:shadow-lg transition-all group">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center text-white font-display font-700 text-lg mb-6 group-hover:shadow-glow transition-all">
+          {{ forloop.counter }}
+        </div>
+        {% if forloop.counter == 1 %}
+        <h3 class="font-display font-600 text-xl text-slate-900 mb-3">Get your API key</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Sign up, verify your WhatsApp, and grab a live API key from your developer dashboard in under 2 minutes.</p>
+        {% elif forloop.counter == 2 %}
+        <h3 class="font-display font-600 text-xl text-slate-900 mb-3">Call the API</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">POST a phone number, choose your channel (WhatsApp, SMS, or Voice), and we handle the rest — routing, retries, fallbacks.</p>
+        {% else %}
+        <h3 class="font-display font-600 text-xl text-slate-900 mb-3">OTP delivered</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Your user receives their OTP in under 400ms on average. You get a webhook confirmation with delivery status and latency.</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Code snippet -->
+    <div class="mt-12 glass rounded-3xl overflow-hidden border border-slate-200">
+      <div class="flex items-center gap-2 px-6 py-3 border-b border-slate-100 bg-slate-50/60">
+        <div class="w-3 h-3 rounded-full bg-red-400"></div>
+        <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+        <div class="w-3 h-3 rounded-full bg-green-400"></div>
+        <span class="ml-4 text-xs font-mono text-slate-400">example.py</span>
+      </div>
+      <pre class="p-6 text-sm font-mono text-slate-700 overflow-x-auto leading-relaxed"><code><span class="text-emerald-700 font-600">import</span> fastotp
+
+client = fastotp.Client(<span class="text-amber-600">"fotk_live_your_api_key"</span>)
+
+<span class="text-slate-400"># Send OTP via WhatsApp</span>
+response = client.send_otp(
+    identifier=<span class="text-amber-600">"+234801234567"</span>,
+    channel=<span class="text-amber-600">"whatsapp"</span>,
+    expires_in=<span class="text-blue-600">300</span>
+)
+
+<span class="text-slate-400"># {'success': True, 'otp_id': 'abc123', 'latency_ms': 342}</span>
+</code></pre>
+    </div>
+  </section>
+
+  <!-- ── CHANNELS ───────────────────────────────── -->
+  <section class="py-20 bg-emerald-950 text-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-14">
+        <h2 class="font-display text-4xl font-700 mb-4">Every channel, one API</h2>
+        <p class="text-emerald-200 max-w-lg mx-auto">We route your OTPs through the best channel for each recipient, automatically.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for ch in "0123" %}
+        <div class="rounded-3xl p-7 bg-emerald-900/50 border border-emerald-800 hover:border-emerald-600 transition-all group hover:-translate-y-1">
+          {% if forloop.counter == 1 %}
+          <div class="w-12 h-12 rounded-2xl bg-lime-400/20 flex items-center justify-center text-2xl mb-5">💬</div>
+          <h3 class="font-display font-600 text-lg mb-2">WhatsApp</h3>
+          <p class="text-emerald-300 text-sm">Highest open rates. End-to-end encrypted. Best for mobile-first markets.</p>
+          <div class="mt-4 text-xs font-mono text-lime-300 bg-lime-400/10 px-3 py-1 rounded-full inline-block">99.2% delivery</div>
+          {% elif forloop.counter == 2 %}
+          <div class="w-12 h-12 rounded-2xl bg-blue-400/20 flex items-center justify-center text-2xl mb-5">📱</div>
+          <h3 class="font-display font-600 text-lg mb-2">SMS</h3>
+          <p class="text-emerald-300 text-sm">Universal fallback. Works on any phone, any network, no internet needed.</p>
+          <div class="mt-4 text-xs font-mono text-blue-300 bg-blue-400/10 px-3 py-1 rounded-full inline-block">98.1% delivery</div>
+          {% elif forloop.counter == 3 %}
+          <div class="w-12 h-12 rounded-2xl bg-purple-400/20 flex items-center justify-center text-2xl mb-5">📞</div>
+          <h3 class="font-display font-600 text-lg mb-2">Voice Call</h3>
+          <p class="text-emerald-300 text-sm">Automated voice OTP for users who can't read texts. Fully localized.</p>
+          <div class="mt-4 text-xs font-mono text-purple-300 bg-purple-400/10 px-3 py-1 rounded-full inline-block">97.5% delivery</div>
+          {% else %}
+          <div class="w-12 h-12 rounded-2xl bg-orange-400/20 flex items-center justify-center text-2xl mb-5">📧</div>
+          <h3 class="font-display font-600 text-lg mb-2">Email</h3>
+          <p class="text-emerald-300 text-sm">Branded OTP emails for desktop users and enterprise workflows.</p>
+          <div class="mt-4 text-xs font-mono text-orange-300 bg-orange-400/10 px-3 py-1 rounded-full inline-block">99.8% delivery</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ───────────────────────────────────── -->
+  <section class="py-24 max-w-7xl mx-auto px-6 text-center">
+    <div class="glass rounded-3xl p-16 border border-emerald-100 relative overflow-hidden">
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent"></div>
+      <p class="text-xs font-mono text-emerald-600 tracking-wider uppercase mb-4">Start free today</p>
+      <h2 class="font-display text-4xl md:text-5xl font-700 text-slate-900 mb-6">Ready to build?</h2>
+      <p class="text-slate-500 max-w-md mx-auto mb-10">Get 5 free OTP credits, no credit card required. Upgrade when you need more.</p>
+      <a href="{% url 'signup' %}" class="btn-push inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-10 py-4 rounded-2xl shadow-glow hover:shadow-lg transition-all text-lg">
+        Create free account
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </section>
+
+</main>
+{% endblock %}

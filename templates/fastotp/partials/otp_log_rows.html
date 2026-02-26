@@ -1,0 +1,54 @@
+{% for log in logs %}
+<div class="flex items-center gap-4 px-6 py-3.5 hover:bg-slate-50/60 transition-colors">
+  <!-- Channel icon -->
+  <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm flex-shrink-0
+    {% if log.channel == 'whatsapp' %}bg-green-100{% elif log.channel == 'sms' %}bg-blue-100{% else %}bg-purple-100{% endif %}">
+    {% if log.channel == 'whatsapp' %}💬{% elif log.channel == 'sms' %}📱{% elif log.channel == 'voice' %}📞{% else %}📧{% endif %}
+  </div>
+
+  <!-- Identifier & country -->
+  <div class="flex-1 min-w-0">
+    <p class="text-sm font-mono font-500 text-slate-700 truncate">{{ log.identifier }}</p>
+    <p class="text-xs text-slate-400">{{ log.country_name|default:"—" }} · {{ log.channel }}</p>
+  </div>
+
+  <!-- Status badge -->
+  <div class="flex-shrink-0">
+    {% if log.status == 'delivered' or log.status == 'verified' %}
+    <span class="inline-flex items-center gap-1 text-xs font-600 bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-0.5 rounded-full">
+      <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+      {{ log.status }}
+    </span>
+    {% elif log.status == 'pending' or log.status == 'sent' %}
+    <span class="inline-flex items-center gap-1 text-xs font-600 shimmer-pending border border-amber-200 text-amber-700 px-2.5 py-0.5 rounded-full">
+      <span class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></span>
+      {{ log.status }}
+    </span>
+    {% elif log.status == 'failed' %}
+    <span class="inline-flex items-center gap-1 text-xs font-600 bg-red-50 text-red-600 border border-red-100 px-2.5 py-0.5 rounded-full">
+      <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+      failed
+    </span>
+    {% else %}
+    <span class="inline-flex items-center text-xs text-slate-400 border border-slate-100 px-2.5 py-0.5 rounded-full">{{ log.status }}</span>
+    {% endif %}
+  </div>
+
+  <!-- Latency -->
+  <div class="flex-shrink-0 text-right hidden sm:block">
+    {% if log.latency_ms %}
+    <p class="text-xs font-mono font-600 {% if log.latency_ms < 500 %}text-lime-700{% elif log.latency_ms < 1000 %}text-amber-600{% else %}text-red-500{% endif %}">
+      {{ log.latency_ms }}ms
+    </p>
+    {% else %}
+    <p class="text-xs text-slate-300">—</p>
+    {% endif %}
+    <p class="text-xs text-slate-300">{{ log.created_at|timesince }} ago</p>
+  </div>
+</div>
+{% empty %}
+<div class="text-center py-12 text-slate-400">
+  <div class="text-4xl mb-3">📭</div>
+  <p class="text-sm">No OTPs sent yet. Start building!</p>
+</div>
+{% endfor %}

@@ -1,0 +1,131 @@
+{% extends 'fastotp/dashboard_base.html' %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block dashboard_content %}
+<!-- Stat cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+  <!-- Credits card -->
+  <div class="glass rounded-3xl p-6 border border-emerald-100 relative overflow-hidden col-span-1 sm:col-span-2 lg:col-span-1">
+    <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-bl-3xl"></div>
+    <p class="text-xs font-600 text-slate-400 uppercase tracking-wider mb-3">Credit Balance</p>
+    <div class="flex items-end gap-2 mb-2">
+      <span class="font-display font-800 text-4xl text-slate-900">{{ balance.balance|floatformat:2 }}</span>
+      <span class="text-sm text-slate-400 mb-1.5">credits</span>
+    </div>
+    <div class="flex items-center gap-2 mt-3">
+      <a href="{% url 'billing' %}" class="text-xs bg-emerald-600 text-white px-3 py-1 rounded-lg hover:bg-emerald-700 transition-colors font-medium">Top Up</a>
+      <span class="text-xs text-slate-400">All-time: {{ balance.total_topped_up }}</span>
+    </div>
+  </div>
+
+  <!-- OTPs sent -->
+  <div class="glass rounded-3xl p-6 border border-slate-100">
+    <p class="text-xs font-600 text-slate-400 uppercase tracking-wider mb-3">OTPs Sent</p>
+    <p class="font-display font-700 text-3xl text-slate-900">{{ stats.total|default:0 }}</p>
+    <p class="text-xs text-slate-400 mt-2">all time</p>
+  </div>
+
+  <!-- Delivery rate -->
+  <div class="glass rounded-3xl p-6 border border-slate-100">
+    <p class="text-xs font-600 text-slate-400 uppercase tracking-wider mb-3">Delivery Rate</p>
+    {% if stats.total %}
+    <p class="font-display font-700 text-3xl text-emerald-700">
+      {% widthratio stats.delivered stats.total 100 %}%
+    </p>
+    {% else %}
+    <p class="font-display font-700 text-3xl text-slate-300">—</p>
+    {% endif %}
+    <p class="text-xs text-slate-400 mt-2">{{ stats.delivered|default:0 }} delivered</p>
+  </div>
+
+  <!-- Avg latency -->
+  <div class="glass rounded-3xl p-6 border border-slate-100">
+    <p class="text-xs font-600 text-slate-400 uppercase tracking-wider mb-3">Avg Latency</p>
+    <p class="font-display font-700 text-3xl text-lime-700">
+      {% if stats.avg_latency %}{{ stats.avg_latency|floatformat:0 }}ms{% else %}—{% endif %}
+    </p>
+    <p class="text-xs text-slate-400 mt-2">last 50 sends</p>
+  </div>
+</div>
+
+<!-- Quick actions + live log -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+  <!-- Live OTP Log -->
+  <div class="lg:col-span-2">
+    <div class="glass rounded-3xl overflow-hidden border border-slate-200">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <h3 class="font-display font-600 text-slate-800">Live OTP Log</h3>
+          <span class="flex items-center gap-1.5 text-xs bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-100">
+            <span class="w-1.5 h-1.5 bg-lime-400 rounded-full animate-pulse"></span>
+            Live
+          </span>
+        </div>
+        <a href="{% url 'otp_logs' %}" class="text-xs text-emerald-600 hover:text-emerald-700 font-medium">View all →</a>
+      </div>
+
+      <!-- HTMX polling container -->
+      <div id="live-log"
+           hx-get="{% url 'otp_logs_poll' %}"
+           hx-trigger="every 10s"
+           hx-swap="innerHTML"
+           class="divide-y divide-slate-50">
+        {% include 'fastotp/partials/otp_log_rows.html' with logs=recent_logs %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Right column: quick-start + keys -->
+  <div class="space-y-5">
+
+    <!-- API Keys summary -->
+    <div class="glass rounded-3xl p-5 border border-slate-200">
+      <div class="flex items-center justify-between mb-4">
+        <h4 class="font-display font-600 text-slate-800 text-sm">API Keys</h4>
+        <a href="{% url 'developer' %}" class="text-xs text-emerald-600 hover:text-emerald-700 font-medium">Manage →</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-100 flex items-center justify-center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="m15 7 4 4-4 4m-6 0-4-4 4-4"/></svg>
+        </div>
+        <div>
+          <p class="font-display font-700 text-xl text-slate-800">{{ active_keys }}</p>
+          <p class="text-xs text-slate-400">active key{{ active_keys|pluralize }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick-start card -->
+    <div class="glass rounded-3xl p-5 border border-slate-200 space-y-3">
+      <h4 class="font-display font-600 text-slate-800 text-sm">Quick Start</h4>
+      <div class="space-y-2">
+        {% if not request.user.is_verified %}
+        <div class="flex items-center gap-2.5 p-3 rounded-xl bg-amber-50 border border-amber-100">
+          <span class="text-amber-500 text-sm">⚠️</span>
+          <p class="text-xs text-amber-700">Verify your WhatsApp to send OTPs</p>
+        </div>
+        {% else %}
+        <div class="flex items-center gap-2.5 p-3 rounded-xl bg-emerald-50 border border-emerald-100">
+          <span class="text-emerald-500 text-sm">✅</span>
+          <p class="text-xs text-emerald-700">Account verified</p>
+        </div>
+        {% endif %}
+        {% if active_keys == 0 %}
+        <a href="{% url 'developer' %}" class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-emerald-50 hover:border-emerald-100 transition-all group">
+          <svg class="w-4 h-4 text-slate-400 group-hover:text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 7 4 4-4 4m-6 0-4-4 4-4"/></svg>
+          <p class="text-xs text-slate-600 group-hover:text-emerald-700">Generate your first API key</p>
+        </a>
+        {% endif %}
+        {% if not balance.balance %}
+        <a href="{% url 'billing' %}" class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-emerald-50 hover:border-emerald-100 transition-all group">
+          <svg class="w-4 h-4 text-slate-400 group-hover:text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          <p class="text-xs text-slate-600 group-hover:text-emerald-700">Add credits to get started</p>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'fastotp/base.html' %}
+{% block title %}Terms of Service — FastOTP{% endblock %}
+
+{% block content %}
+<main class="pt-16">
+  <div class="max-w-3xl mx-auto px-6 py-20">
+    <div class="mb-14">
+      <p class="text-xs font-mono text-emerald-600 tracking-wider uppercase mb-3">Effective: January 2025</p>
+      <h1 class="font-display text-5xl font-700 text-slate-900 mb-5">Terms of Service</h1>
+      <p class="text-lg text-slate-500 leading-relaxed">By using FastOTP, you agree to these terms. We've written them in plain language because we believe clarity builds trust.</p>
+    </div>
+
+    <div class="space-y-8 text-slate-600">
+      {% for section in "12345678" %}
+      <div class="glass rounded-3xl p-8 border border-slate-100">
+        {% if forloop.counter == 1 %}
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">1. Acceptance of Terms</h2>
+        <p>By creating an account or using the FastOTP API, you agree to be bound by these Terms and our Privacy Policy. If you're agreeing on behalf of an organization, you represent that you have authority to bind that organization.</p>
+        {% elif forloop.counter == 2 %}
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">2. Permitted Use</h2>
+        <p class="mb-3">You may use FastOTP to send one-time passwords for legitimate authentication purposes. <strong class="text-slate-800">Prohibited uses include:</strong></p>
+        <ul class="space-y-2">
+          <li class="flex items-start gap-3"><span class="w-2 h-2 bg-red-400 rounded-full mt-1.5 flex-shrink-0"></span>Sending unsolicited messages or spam</li>
+          <li class="flex items-start gap-3"><span class="w-2 h-2 bg-red-400 rounded-full mt-1.5 flex-shrink-0"></span>Sending OTPs to numbers without their owner's consent</li>
+          <li class="flex items-start gap-3"><span class="w-2 h-2 bg-red-400 rounded-full mt-1.5 flex-shrink-0"></span>Fraudulent authentication, phishing, or social engineering</li>
+          <li class="flex items-start gap-3"><span class="w-2 h-2 bg-red-400 rounded-full mt-1.5 flex-shrink-0"></span>Bypassing telecom regulations in any supported country</li>
+        </ul>
+        {% elif forloop.counter == 3 %}
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">3. API Keys & Security</h2>
+        <p>You are responsible for keeping your API keys confidential. Do not expose live keys in client-side code, public repositories, or shared environments. We may suspend your account if a key is used maliciously, even if that use was unauthorized.</p>
+        {% elif forloop.counter == 4 %}
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">4. Credits & Billing</h2>
+        <p>Credits are non-refundable once consumed. Unused credits expire 12 months from the date of purchase. We reserve the right to change pricing with 30 days' notice. All prices are in USD.</p>
+        {% elif forloop.counter == 5 %}
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">5. Service Level Agreement</h2>
+        <p>We target <strong class="text-slate-800">99.99% API availability</strong> measured monthly. In the event of downtime exceeding this threshold, affected customers are entitled to credit equivalent to 10x the downtime as a proportion of their monthly spend, up to 30% of that month's spend.</p>
+        {% elif forloop.counter == 6 %}
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">6. Suspension & Termination</h2>
+        <p>We may suspend your account immediately if we detect abuse, fraud, or violation of these terms. For non-urgent policy violations, we will provide 7 days' notice and an opportunity to remediate.</p>
+        {% elif forloop.counter == 7 %}
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">7. Limitation of Liability</h2>
+        <p>FastOTP's total liability for any claim is limited to the amount you paid us in the 3 months preceding the claim. We are not liable for indirect, incidental, or consequential damages, including lost revenue or data.</p>
+        {% else %}
+        <h2 class="font-display font-700 text-2xl text-slate-900 mb-4">8. Contact & Disputes</h2>
+        <p>For legal inquiries: <a href="mailto:legal@fastotp.co" class="text-emerald-600 font-medium">legal@fastotp.co</a>. Disputes shall be resolved under Nigerian law in Lagos courts, unless we agree otherwise in writing.</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</main>
+{% endblock %}

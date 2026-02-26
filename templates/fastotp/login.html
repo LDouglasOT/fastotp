@@ -1,0 +1,62 @@
+{% extends 'fastotp/base.html' %}
+{% block title %}Sign In — FastOTP{% endblock %}
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 flex items-center justify-center p-4">
+  <div class="absolute inset-0 opacity-10"
+       style="background-image: linear-gradient(rgba(5,150,105,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(5,150,105,0.3) 1px, transparent 1px); background-size: 60px 60px;"></div>
+  <div class="absolute top-1/4 right-1/4 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl"></div>
+
+  <div class="relative w-full max-w-md">
+    <div class="flex items-center justify-center gap-2 mb-8">
+      <div class="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center shadow-glow">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.56 3.56 2 2 0 0 1 3.53 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.5A16 16 0 0 0 16 16.59l.87-.88a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <span class="font-display font-700 text-xl text-white">FastOTP</span>
+    </div>
+
+    <div class="bg-white/95 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/80">
+      <h1 class="font-display text-2xl font-700 text-slate-900 mb-1">Welcome back</h1>
+      <p class="text-slate-500 text-sm mb-8">Sign in to your developer account</p>
+
+      {% if error %}
+      <div class="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 flex items-center gap-3 mb-6">
+        <span class="text-red-400">⚠️</span>
+        <p class="text-sm text-red-700">{{ error }}</p>
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{% url 'login' %}" x-data="{loading:false}" @submit="loading=true">
+        {% csrf_token %}
+        <div class="mb-5">
+          <label class="block text-xs font-600 text-slate-600 mb-1.5">Email address</label>
+          <input type="email" name="email" value="{{ email|default:'' }}" required autofocus
+                 class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white transition-all"
+                 placeholder="you@company.com">
+        </div>
+        <div class="mb-7">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-600 text-slate-600">Password</label>
+            <a href="#" class="text-xs text-emerald-600 hover:text-emerald-700">Forgot?</a>
+          </div>
+          <input type="password" name="password" required
+                 class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white transition-all">
+        </div>
+        <button type="submit" :disabled="loading"
+                class="btn-push w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-70 text-white font-600 py-3.5 rounded-2xl shadow-sm hover:shadow-glow transition-all flex items-center justify-center gap-2 text-sm">
+          <span x-show="!loading">Sign in →</span>
+          <span x-show="loading" class="flex items-center gap-2">
+            <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            Signing in...
+          </span>
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-slate-500 mt-6">
+        Don't have an account? <a href="{% url 'signup' %}" class="text-emerald-600 font-medium hover:text-emerald-700">Create one free →</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

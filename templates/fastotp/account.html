@@ -1,0 +1,136 @@
+{% extends 'fastotp/dashboard_base.html' %}
+{% block page_title %}Account Settings{% endblock %}
+
+{% block dashboard_content %}
+<div class="max-w-2xl space-y-6">
+
+  <!-- Profile Card -->
+  <div class="glass rounded-3xl overflow-hidden border border-slate-200">
+    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+      <h3 class="font-display font-600 text-slate-800">Profile Information</h3>
+    </div>
+    <form hx-post="{% url 'account' %}"
+          hx-target="#profile-feedback"
+          hx-swap="innerHTML"
+          class="p-6 space-y-5">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="update_profile">
+      <div id="profile-feedback"></div>
+
+      <!-- Avatar -->
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-16 h-16 rounded-3xl bg-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-sm">
+          {{ request.user.avatar_initials }}
+        </div>
+        <div>
+          <p class="font-600 text-slate-800">{{ request.user.get_full_name|default:"Set your name" }}</p>
+          <p class="text-sm text-slate-500">{{ request.user.email }}</p>
+          {% if request.user.is_verified %}
+          <span class="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full mt-1 font-600">✓ Verified</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-600 text-slate-600 mb-1.5">First name</label>
+          <input type="text" name="first_name" value="{{ request.user.first_name }}"
+                 class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white/80 transition-all">
+        </div>
+        <div>
+          <label class="block text-xs font-600 text-slate-600 mb-1.5">Last name</label>
+          <input type="text" name="last_name" value="{{ request.user.last_name }}"
+                 class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white/80 transition-all">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-600 text-slate-600 mb-1.5">Company name</label>
+        <input type="text" name="company_name" value="{{ request.user.company_name }}"
+               class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white/80 transition-all">
+      </div>
+      <div>
+        <label class="block text-xs font-600 text-slate-600 mb-1.5">Phone number</label>
+        <input type="tel" name="phone_number" value="{{ request.user.phone_number }}"
+               class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm font-mono bg-white/80 transition-all"
+               placeholder="+234...">
+      </div>
+      <button type="submit" class="btn-push bg-emerald-600 hover:bg-emerald-700 text-white font-600 px-6 py-3 rounded-xl text-sm shadow-sm hover:shadow-glow transition-all">
+        Save Changes
+      </button>
+    </form>
+  </div>
+
+  <!-- Change Password -->
+  <div class="glass rounded-3xl overflow-hidden border border-slate-200">
+    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+      <h3 class="font-display font-600 text-slate-800">Change Password</h3>
+    </div>
+    <form hx-post="{% url 'account' %}"
+          hx-target="#password-feedback"
+          hx-swap="innerHTML"
+          class="p-6 space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="change_password">
+      <div id="password-feedback"></div>
+      <div>
+        <label class="block text-xs font-600 text-slate-600 mb-1.5">Current password</label>
+        <input type="password" name="current_password" required
+               class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white/80 transition-all">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-600 text-slate-600 mb-1.5">New password</label>
+          <input type="password" name="new_password" required minlength="8"
+                 class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white/80 transition-all">
+        </div>
+        <div>
+          <label class="block text-xs font-600 text-slate-600 mb-1.5">Confirm new</label>
+          <input type="password" name="confirm_password" required
+                 class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-sm bg-white/80 transition-all">
+        </div>
+      </div>
+      <button type="submit" class="btn-push border-2 border-slate-300 hover:border-slate-400 text-slate-700 font-600 px-6 py-3 rounded-xl text-sm transition-all">
+        Update Password
+      </button>
+    </form>
+  </div>
+
+  <!-- Login Sessions -->
+  <div class="glass rounded-3xl overflow-hidden border border-slate-200">
+    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+      <h3 class="font-display font-600 text-slate-800">Login Sessions</h3>
+    </div>
+    <div class="divide-y divide-slate-50">
+      {% for session in sessions %}
+      <div class="flex items-center gap-4 px-6 py-4">
+        <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-lg flex-shrink-0">
+          {% if session.is_current %}🖥️{% else %}💻{% endif %}
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-slate-800">
+            {{ session.ip_address|default:"Unknown IP" }}
+            {% if session.is_current %}<span class="ml-2 text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Current</span>{% endif %}
+          </p>
+          <p class="text-xs text-slate-400">{{ session.user_agent|truncatechars:60 }}</p>
+          <p class="text-xs text-slate-400">Last active {{ session.last_active|timesince }} ago</p>
+        </div>
+      </div>
+      {% empty %}
+      <div class="text-center py-8 text-slate-400">
+        <p class="text-sm">No session data available.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Danger zone -->
+  <div class="border-2 border-red-100 rounded-3xl p-6">
+    <h3 class="font-display font-600 text-red-800 mb-2">Danger Zone</h3>
+    <p class="text-sm text-red-600 mb-4">Permanently delete your account and all associated data.</p>
+    <button class="btn-push border border-red-300 text-red-600 hover:bg-red-50 font-600 px-5 py-2.5 rounded-xl text-sm transition-all"
+            onclick="confirm('Are you absolutely sure? This cannot be undone.') && alert('Please contact support to delete your account.')">
+      Delete Account
+    </button>
+  </div>
+</div>
+{% endblock %}

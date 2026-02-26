@@ -1,0 +1,61 @@
+{% load i18n %}
+<div class="flex items-center gap-4 px-6 py-4 hover:bg-slate-50/50 transition-colors group">
+  <!-- Env badge -->
+  <div class="flex-shrink-0">
+    {% if key.environment == 'live' %}
+    <span class="text-xs font-600 bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-200">Live</span>
+    {% else %}
+    <span class="text-xs font-600 bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full border border-slate-200">Test</span>
+    {% endif %}
+  </div>
+
+  <!-- Key info -->
+  <div class="flex-1 min-w-0">
+    <p class="text-sm font-600 text-slate-800">{{ key.name }}</p>
+    <div class="flex items-center gap-2 mt-0.5">
+      <code class="text-xs font-mono text-slate-500" id="key-display-{{ key.id }}">
+        {% if show_full %}{{ key.key }}{% else %}{{ key.prefix }}{{ key.prefix|length|add:3|rjust:40|stringformat:"s"|slice:":40"|cut:" " }}{% endif %}
+      </code>
+      {% if show_full %}
+      <span class="text-xs text-amber-600 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded font-medium">
+        ⚠️ Save this now — it won't show again
+      </span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="hidden sm:block text-right flex-shrink-0">
+    <p class="text-xs font-mono text-slate-500">{{ key.total_requests }} requests</p>
+    {% if key.last_used_at %}
+    <p class="text-xs text-slate-400">Last used {{ key.last_used_at|timesince }} ago</p>
+    {% else %}
+    <p class="text-xs text-slate-300">Never used</p>
+    {% endif %}
+  </div>
+
+  <!-- Actions -->
+  <div class="flex items-center gap-2 flex-shrink-0" x-data="{copied:false}">
+    {% if key.status == 'active' %}
+    <!-- Copy button -->
+    <button @click="navigator.clipboard.writeText('{{ key.key }}'); copied=true; setTimeout(()=>copied=false,2000)"
+            class="btn-push text-xs bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg transition-all font-medium">
+      <span x-show="!copied">Copy</span>
+      <span x-show="copied" class="text-emerald-600">✓</span>
+    </button>
+    <!-- Revoke button -->
+    <form hx-post="{% url 'revoke_key' key.id %}"
+          hx-target="closest div[class*='flex items-center gap-4']"
+          hx-swap="outerHTML"
+          hx-confirm="Revoke this key? This action is permanent."
+          class="inline">
+      {% csrf_token %}
+      <button type="submit" class="btn-push text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg transition-all font-medium">
+        Revoke
+      </button>
+    </form>
+    {% else %}
+    <span class="text-xs text-red-500 bg-red-50 border border-red-100 px-2.5 py-0.5 rounded-full font-medium">Revoked</span>
+    {% endif %}
+  </div>
+</div>

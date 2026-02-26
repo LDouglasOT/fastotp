@@ -1,0 +1,13 @@
+<!-- otp_error.html — returned inline by HTMX -->
+<div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3 mb-4">
+  <span class="text-xl">⚠️</span>
+  <p class="text-sm text-red-700 font-medium">{{ message }}</p>
+</div>
+
+<button
+  hx-post="{% url 'send_signup_otp' %}"
+  hx-target="#otp-section"
+  hx-swap="outerHTML"
+  class="btn-push w-full border-2 border-emerald-600 text-emerald-700 font-600 py-3 rounded-2xl hover:bg-emerald-50 transition-all text-sm">
+  Send a new code
+</button>

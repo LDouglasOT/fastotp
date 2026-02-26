@@ -1,0 +1,379 @@
+{% extends 'fastotp/base.html' %}
+{% block title %}Coverage & Rates — FastOTP{% endblock %}
+
+{% block extra_head %}
+<style>
+  .currency-badge {
+    background: linear-gradient(135deg, rgba(5,150,105,0.12), rgba(190,242,100,0.08));
+    border: 1px solid rgba(5,150,105,0.2);
+  }
+  .country-card {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .country-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(5,150,105,0.12), 0 4px 12px rgba(0,0,0,0.06);
+  }
+  .rate-bar-fill {
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .view-toggle-active {
+    background: #059669;
+    color: white;
+    box-shadow: 0 2px 8px rgba(5,150,105,0.3);
+  }
+  .price-pill {
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border: 1.5px solid #6ee7b7;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in-up { animation: fadeInUp 0.4s ease forwards; }
+  .stat-glow {
+    box-shadow: 0 0 24px rgba(190,242,100,0.25), 0 4px 16px rgba(0,0,0,0.08);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="pt-16">
+
+  <!-- ── HERO ──────────────────────────────────────── -->
+  <section class="relative bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 py-20 text-white overflow-hidden">
+    <div class="absolute inset-0 opacity-10"
+         style="background-image: linear-gradient(rgba(5,150,105,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(5,150,105,0.3) 1px, transparent 1px); background-size: 60px 60px;"></div>
+    <div class="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-0 w-64 h-64 bg-lime-400/8 rounded-full blur-3xl"></div>
+
+    <div class="relative max-w-7xl mx-auto px-6 text-center">
+      <div class="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-medium px-4 py-1.5 rounded-full mb-6">
+        <span class="w-1.5 h-1.5 bg-lime-400 rounded-full animate-pulse"></span>
+        Prices in local currency — no conversion needed
+      </div>
+      <h1 class="font-display text-5xl sm:text-6xl font-800 mb-5 leading-tight">
+        Coverage & <span class="text-gradient">Local Rates</span>
+      </h1>
+      <p class="text-slate-300 max-w-xl mx-auto text-lg leading-relaxed">
+        Transparent, per-OTP pricing shown in each country's own currency. No hidden fees, no minimum commitments.
+      </p>
+
+      <!-- Quick stats -->
+      <div class="flex flex-wrap justify-center gap-6 mt-12">
+        <div class="glass-dark rounded-2xl px-6 py-4 stat-glow">
+          <p class="font-display font-800 text-3xl text-lime-300">{{ countries|length }}</p>
+          <p class="text-xs text-emerald-300 mt-1">Countries covered</p>
+        </div>
+        <div class="glass-dark rounded-2xl px-6 py-4 stat-glow">
+          <p class="font-display font-800 text-3xl text-white">30 UGX</p>
+          <p class="text-xs text-emerald-300 mt-1">Uganda per OTP</p>
+        </div>
+        <div class="glass-dark rounded-2xl px-6 py-4 stat-glow">
+          <p class="font-display font-800 text-3xl text-white">99.5%</p>
+          <p class="text-xs text-emerald-300 mt-1">Top delivery rate</p>
+        </div>
+        <div class="glass-dark rounded-2xl px-6 py-4 stat-glow">
+          <p class="font-display font-800 text-3xl text-lime-300">380ms</p>
+          <p class="text-xs text-emerald-300 mt-1">Avg. delivery time</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── MAIN CONTENT ──────────────────────────────── -->
+  <section class="py-12 max-w-7xl mx-auto px-6"
+           x-data="{
+             search: '',
+             view: 'table',
+             sortBy: 'whatsapp',
+             sortDir: 'desc',
+             showAll: false
+           }">
+
+    <!-- Controls bar -->
+    <div class="glass rounded-2xl p-4 mb-8 flex flex-col sm:flex-row gap-4 items-start sm:items-center border border-slate-200/80 shadow-sm">
+
+      <!-- Search -->
+      <div class="relative flex-1 min-w-0">
+        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="search-input" placeholder="Search country or currency…"
+               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 bg-white/80 transition-all">
+      </div>
+
+      <!-- Sort buttons -->
+      <div class="flex gap-2 flex-wrap items-center">
+        <span class="text-xs text-slate-400 font-medium">Sort:</span>
+        <button onclick="sortTable('country')" id="sort-country"
+                class="sort-btn text-xs px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 font-medium text-slate-600 transition-colors">A–Z</button>
+        <button onclick="sortTable('whatsapp')" id="sort-whatsapp"
+                class="sort-btn text-xs px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium transition-colors">WhatsApp ↓</button>
+        <button onclick="sortTable('cost')" id="sort-cost"
+                class="sort-btn text-xs px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 font-medium text-slate-600 transition-colors">Lowest Cost</button>
+      </div>
+
+      <!-- View toggle -->
+      <div class="flex gap-1 bg-slate-100 p-1 rounded-xl flex-shrink-0">
+        <button onclick="setView('table')" id="view-table"
+                class="view-btn px-3 py-1.5 rounded-lg text-xs font-medium transition-all view-toggle-active">
+          ☰ Table
+        </button>
+        <button onclick="setView('cards')" id="view-cards"
+                class="view-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 transition-all">
+          ⊞ Cards
+        </button>
+      </div>
+    </div>
+
+    <!-- ── TABLE VIEW ──────────────────────────────── -->
+    <div id="table-view">
+      <div class="glass rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm">
+        <table class="w-full text-sm" id="coverage-table">
+          <thead>
+            <tr class="border-b border-slate-100 bg-gradient-to-r from-slate-50/90 to-emerald-50/30">
+              <th class="text-left px-6 py-4 text-xs font-700 text-slate-500 uppercase tracking-wider">Country</th>
+              <th class="text-left px-6 py-4 text-xs font-700 text-slate-500 uppercase tracking-wider hidden sm:table-cell">Dial Code</th>
+              <th class="text-left px-6 py-4 text-xs font-700 text-slate-500 uppercase tracking-wider">WhatsApp</th>
+              <th class="text-left px-6 py-4 text-xs font-700 text-slate-500 uppercase tracking-wider hidden md:table-cell">SMS</th>
+              <th class="text-left px-6 py-4 text-xs font-700 text-slate-500 uppercase tracking-wider">Local Price / OTP</th>
+              <th class="text-left px-6 py-4 text-xs font-700 text-slate-500 uppercase tracking-wider hidden lg:table-cell">USD equiv.</th>
+            </tr>
+          </thead>
+          <tbody id="coverage-tbody">
+            {% for c in countries %}
+            <tr class="border-b border-slate-50 hover:bg-gradient-to-r hover:from-emerald-50/40 hover:to-transparent transition-all country-row fade-in-up"
+                data-country="{{ c.country|lower }}"
+                data-currency="{{ c.currency_code|lower }}"
+                data-whatsapp="{{ c.whatsapp }}"
+                data-cost="{{ c.cost }}"
+                style="animation-delay: {{ forloop.counter0 }}0ms">
+              <!-- Country -->
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <span class="text-2xl drop-shadow-sm">{{ c.flag }}</span>
+                  <div>
+                    <p class="font-600 text-slate-800">{{ c.country }}</p>
+                    <p class="text-xs text-slate-400 font-mono">{{ c.code }}</p>
+                  </div>
+                </div>
+              </td>
+              <!-- Dial -->
+              <td class="px-6 py-4 hidden sm:table-cell">
+                <span class="font-mono text-slate-600 text-xs bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">{{ c.dial }}</span>
+              </td>
+              <!-- WhatsApp rate -->
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2.5">
+                  <div class="flex-1 max-w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full rate-bar-fill
+                      {% if c.whatsapp >= 98 %}bg-gradient-to-r from-emerald-400 to-emerald-500
+                      {% elif c.whatsapp >= 95 %}bg-gradient-to-r from-lime-400 to-lime-500
+                      {% else %}bg-gradient-to-r from-amber-400 to-amber-500{% endif %}"
+                         style="width:{{ c.whatsapp }}%"></div>
+                  </div>
+                  <span class="text-xs font-mono font-700
+                    {% if c.whatsapp >= 98 %}text-emerald-700{% elif c.whatsapp >= 95 %}text-lime-700{% else %}text-amber-600{% endif %}">
+                    {{ c.whatsapp }}%
+                  </span>
+                </div>
+              </td>
+              <!-- SMS rate -->
+              <td class="px-6 py-4 hidden md:table-cell">
+                <div class="flex items-center gap-2.5">
+                  <div class="flex-1 max-w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full" style="width:{{ c.sms }}%"></div>
+                  </div>
+                  <span class="text-xs font-mono text-slate-600">{{ c.sms }}%</span>
+                </div>
+              </td>
+              <!-- Local price -->
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <span class="font-mono font-700 text-emerald-800 price-pill px-3 py-1.5 rounded-xl text-sm whitespace-nowrap">
+                    {{ c.local_cost_display }}
+                  </span>
+                  <span class="text-xs text-slate-400 font-mono hidden sm:inline">{{ c.currency_code }}</span>
+                </div>
+              </td>
+              <!-- USD equiv -->
+              <td class="px-6 py-4 hidden lg:table-cell">
+                <span class="text-xs font-mono text-slate-400">${{ c.cost }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <!-- Empty state -->
+        <div id="no-results" class="hidden text-center py-16 text-slate-400">
+          <div class="text-4xl mb-3">🌍</div>
+          <p class="text-sm font-medium">No countries match your search.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CARDS VIEW ──────────────────────────────── -->
+    <div id="cards-view" class="hidden">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="cards-grid">
+        {% for c in countries %}
+        <div class="country-card glass rounded-2xl p-5 border border-slate-200/80 cursor-default card-item fade-in-up"
+             data-country="{{ c.country|lower }}"
+             data-currency="{{ c.currency_code|lower }}"
+             data-whatsapp="{{ c.whatsapp }}"
+             data-cost="{{ c.cost }}"
+             style="animation-delay: {{ forloop.counter0 }}0ms">
+
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2.5">
+              <span class="text-3xl drop-shadow">{{ c.flag }}</span>
+              <div>
+                <p class="font-700 text-slate-800 text-sm leading-tight">{{ c.country }}</p>
+                <p class="text-xs text-slate-400 font-mono">{{ c.dial }}</p>
+              </div>
+            </div>
+            <span class="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded-lg">{{ c.code }}</span>
+          </div>
+
+          <!-- Price -->
+          <div class="currency-badge rounded-xl px-4 py-3 mb-4 text-center">
+            <p class="text-xs text-emerald-600 font-600 uppercase tracking-wider mb-1">Per OTP</p>
+            <p class="font-display font-800 text-xl text-emerald-800">{{ c.local_cost_display }}</p>
+            <p class="text-xs text-slate-500 mt-0.5 font-mono">≈ ${{ c.cost }} USD</p>
+          </div>
+
+          <!-- Delivery rates -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500 flex items-center gap-1">💬 WhatsApp</span>
+              <div class="flex items-center gap-2">
+                <div class="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full
+                    {% if c.whatsapp >= 98 %}bg-emerald-500{% elif c.whatsapp >= 95 %}bg-lime-400{% else %}bg-amber-400{% endif %}"
+                       style="width:{{ c.whatsapp }}%"></div>
+                </div>
+                <span class="font-mono font-700
+                  {% if c.whatsapp >= 98 %}text-emerald-700{% elif c.whatsapp >= 95 %}text-lime-700{% else %}text-amber-600{% endif %}">
+                  {{ c.whatsapp }}%
+                </span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500 flex items-center gap-1">📱 SMS</span>
+              <div class="flex items-center gap-2">
+                <div class="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-blue-400 rounded-full" style="width:{{ c.sms }}%"></div>
+                </div>
+                <span class="font-mono text-slate-600">{{ c.sms }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Legend & info bar -->
+    <div class="mt-8 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+      <div class="flex flex-wrap gap-4 text-xs text-slate-500">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+          <span>≥98% Excellent</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-lime-400"></div>
+          <span>≥95% Good</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+          <span>&lt;95% Expanding</span>
+        </div>
+      </div>
+      <div class="sm:ml-auto flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2">
+        <svg class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <p class="text-xs text-emerald-700">Prices in local currencies. Updated monthly. Equivalent USD shown for reference.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA BAND ──────────────────────────────────── -->
+  <section class="py-16 bg-gradient-to-r from-emerald-950 to-slate-900 text-white">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <h2 class="font-display text-3xl font-700 mb-4">Start delivering OTPs across Africa</h2>
+      <p class="text-emerald-300 mb-8">Pay only for what you send — no monthly fees, no contracts.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="{% url 'signup' %}" class="btn-push bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold px-8 py-3.5 rounded-2xl shadow-glow transition-all">
+          Start Free →
+        </a>
+        <a href="{% url 'billing' %}" class="btn-push border border-emerald-600/50 text-emerald-300 hover:bg-emerald-900/30 font-semibold px-8 py-3.5 rounded-2xl transition-all">
+          View Pricing Plans
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  let currentSort = 'whatsapp';
+  let sortAsc = false;
+
+  function setView(v) {
+    document.getElementById('table-view').classList.toggle('hidden', v !== 'table');
+    document.getElementById('cards-view').classList.toggle('hidden', v !== 'cards');
+    document.getElementById('view-table').className = 'view-btn px-3 py-1.5 rounded-lg text-xs font-medium transition-all ' + (v === 'table' ? 'view-toggle-active' : 'text-slate-500 hover:text-slate-700');
+    document.getElementById('view-cards').className = 'view-btn px-3 py-1.5 rounded-lg text-xs font-medium transition-all ' + (v === 'cards' ? 'view-toggle-active' : 'text-slate-500 hover:text-slate-700');
+  }
+
+  function sortTable(col) {
+    if (currentSort === col) sortAsc = !sortAsc;
+    else { currentSort = col; sortAsc = col === 'country'; }
+
+    // Update button styles
+    document.querySelectorAll('.sort-btn').forEach(b => {
+      b.className = 'sort-btn text-xs px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 font-medium text-slate-600 transition-colors';
+    });
+    const activeBtn = document.getElementById('sort-' + col);
+    if (activeBtn) activeBtn.className = 'sort-btn text-xs px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium transition-colors';
+
+    const rows = Array.from(document.querySelectorAll('#coverage-tbody .country-row'));
+    const cards = Array.from(document.querySelectorAll('#cards-grid .card-item'));
+
+    const compare = (a, b) => {
+      let valA, valB;
+      if (col === 'country') {
+        valA = a.dataset.country; valB = b.dataset.country;
+        return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      } else if (col === 'whatsapp') {
+        valA = parseFloat(a.dataset.whatsapp); valB = parseFloat(b.dataset.whatsapp);
+      } else {
+        valA = parseFloat(a.dataset.cost); valB = parseFloat(b.dataset.cost);
+      }
+      return sortAsc ? valA - valB : valB - valA;
+    };
+
+    rows.sort(compare).forEach(r => document.getElementById('coverage-tbody').appendChild(r));
+    cards.sort(compare).forEach(c => document.getElementById('cards-grid').appendChild(c));
+  }
+
+  // Search filtering
+  document.getElementById('search-input').addEventListener('input', function() {
+    const q = this.value.toLowerCase().trim();
+    const rows = document.querySelectorAll('.country-row');
+    const cards = document.querySelectorAll('.card-item');
+    let anyVisible = false;
+
+    [...rows].forEach(el => {
+      const matches = el.dataset.country.includes(q) || el.dataset.currency.includes(q);
+      el.style.display = matches ? '' : 'none';
+      if (matches) anyVisible = true;
+    });
+    [...cards].forEach(el => {
+      const matches = el.dataset.country.includes(q) || el.dataset.currency.includes(q);
+      el.style.display = matches ? '' : 'none';
+    });
+
+    document.getElementById('no-results').classList.toggle('hidden', anyVisible);
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends 'fastotp/dashboard_base.html' %}
+{% load humanize %}
+{% block page_title %}Billing & Credits{% endblock %}
+
+{% block dashboard_content %}
+<div class="max-w-5xl">
+
+  <!-- Balance card -->
+  <div class="relative glass rounded-3xl p-8 border border-emerald-100 mb-8 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-emerald-600 to-emerald-800 opacity-95 rounded-3xl"></div>
+    <div class="absolute top-0 right-0 w-48 h-48 bg-lime-400/20 rounded-bl-full blur-2xl"></div>
+    <div class="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-tr-full blur-xl"></div>
+
+    <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <span class="text-emerald-200 text-xs font-600 uppercase tracking-wider">Current Balance</span>
+          <span class="w-2 h-2 bg-lime-300 rounded-full animate-pulse"></span>
+        </div>
+        <div id="balance-display"
+             hx-get="{% url 'credit_balance_poll' %}"
+             hx-trigger="every 20s"
+             hx-swap="outerHTML">
+          <p class="font-display font-800 text-6xl text-white">{{ balance.balance|floatformat:2 }}</p>
+          <p class="text-emerald-200 text-sm mt-1">credits remaining</p>
+        </div>
+        <div class="flex gap-6 mt-6 text-sm text-emerald-100">
+          <div>
+            <p class="text-xs text-emerald-300 mb-0.5">All-time spent</p>
+            <p class="font-mono font-600">${{ balance.total_topped_up }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-emerald-300 mb-0.5">Credits used</p>
+            <p class="font-mono font-600">{{ balance.total_consumed|floatformat:0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top-up quick action -->
+      <div class="glass-dark rounded-2xl p-5 min-w-56">
+        <p class="text-emerald-300 text-xs font-600 mb-3">Quick Top-Up</p>
+        <div class="space-y-2">
+          {% for pkg in packages|slice:":3" %}
+          <form hx-post="{% url 'initiate_payment' %}"
+                hx-target="#payment-modal-container"
+                hx-swap="innerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="package_id" value="{{ pkg.id }}">
+            <input type="hidden" name="gateway" value="paystack">
+            <button type="submit"
+                    class="btn-push w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs transition-all group">
+              <span class="font-600">{{ pkg.credits }} credits</span>
+              <span class="font-mono text-lime-300">${{ pkg.price_usd }}</span>
+            </button>
+          </form>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment modal container (HTMX target) -->
+  <div id="payment-modal-container"></div>
+
+  <!-- Credit Packages -->
+  <h2 class="font-display font-700 text-xl text-slate-900 mb-5">Credit Packages</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+    {% for pkg in packages %}
+    <div class="relative glass rounded-3xl p-6 border {% if pkg.is_popular %}border-emerald-400 shadow-glow{% else %}border-slate-200{% endif %} hover:shadow-lg transition-all group">
+      {% if pkg.is_popular %}
+      <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-xs font-700 px-4 py-1 rounded-full shadow-sm">
+        ★ Most Popular
+      </div>
+      {% endif %}
+
+      <!-- Tier name -->
+      <div class="mb-5">
+        <span class="text-xs font-600 uppercase tracking-wider
+          {% if pkg.tier == 'starter' %}text-slate-500{% elif pkg.tier == 'pro' %}text-emerald-600{% elif pkg.tier == 'enterprise' %}text-purple-600{% else %}text-amber-600{% endif %}">
+          {{ pkg.tier }}
+        </span>
+        <h3 class="font-display font-700 text-xl text-slate-900 mt-1">{{ pkg.name }}</h3>
+      </div>
+
+      <!-- Price -->
+      <div class="mb-5">
+        <span class="font-display font-800 text-3xl text-slate-900">${{ pkg.price_usd }}</span>
+        <span class="text-slate-400 text-sm ml-1">USD</span>
+        <p class="text-xs font-mono text-emerald-600 mt-1">${{ pkg.price_per_otp }} per OTP</p>
+      </div>
+
+      <!-- Credits -->
+      <div class="bg-emerald-50 rounded-2xl px-4 py-3 mb-5">
+        <p class="font-display font-700 text-2xl text-emerald-700">{{ pkg.credits|intcomma }}</p>
+        <p class="text-xs text-emerald-500">OTP credits</p>
+      </div>
+
+      <!-- Features -->
+      {% if pkg.features %}
+      <ul class="space-y-1.5 mb-6">
+        {% for feat in pkg.features %}
+        <li class="flex items-center gap-2 text-xs text-slate-600">
+          <svg class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          {{ feat }}
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      <!-- Pay buttons -->
+      <div class="space-y-2" x-data="{gateway:'paystack'}">
+        <!-- Gateway selector -->
+        <div class="flex gap-2 mb-3">
+          <button @click="gateway='paystack'"
+                  :class="gateway==='paystack' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500'"
+                  class="flex-1 text-xs py-1.5 rounded-lg border font-medium transition-all">Paystack</button>
+          <button @click="gateway='flutterwave'"
+                  :class="gateway==='flutterwave' ? 'border-orange-400 bg-orange-50 text-orange-700' : 'border-slate-200 text-slate-500'"
+                  class="flex-1 text-xs py-1.5 rounded-lg border font-medium transition-all">Flutterwave</button>
+        </div>
+        <form hx-post="{% url 'initiate_payment' %}"
+              hx-target="#payment-modal-container"
+              hx-swap="innerHTML"
+              :action="''">
+          {% csrf_token %}
+          <input type="hidden" name="package_id" value="{{ pkg.id }}">
+          <input type="hidden" name="gateway" x-bind:value="gateway">
+          <button type="submit"
+                  class="btn-push w-full {% if pkg.is_popular %}bg-emerald-600 hover:bg-emerald-700 text-white shadow-glow{% else %}border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50{% endif %} font-600 py-3 rounded-2xl transition-all text-sm">
+            Pay Now →
+          </button>
+        </form>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full text-center py-10 text-slate-400">
+      <p>No packages available. <a href="{% url 'seed_demo' %}" class="text-emerald-600">Seed demo data</a></p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Transaction History -->
+  <div class="glass rounded-3xl overflow-hidden border border-slate-200">
+    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+      <h3 class="font-display font-600 text-slate-800">Transaction History</h3>
+      <span class="text-xs text-slate-400">{{ transactions|length }} transactions</span>
+    </div>
+    <div class="divide-y divide-slate-50">
+      {% for txn in transactions %}
+      <div class="flex items-center gap-4 px-6 py-4 hover:bg-slate-50/50 transition-colors">
+        <!-- Type icon -->
+        <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-sm flex-shrink-0
+          {% if txn.transaction_type == 'topup' %}bg-emerald-100{% elif txn.transaction_type == 'consumption' %}bg-blue-100{% else %}bg-purple-100{% endif %}">
+          {% if txn.transaction_type == 'topup' %}➕{% elif txn.transaction_type == 'consumption' %}📤{% else %}↩️{% endif %}
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-slate-800">{{ txn.description|default:txn.transaction_type|title }}</p>
+          <p class="text-xs text-slate-400">{{ txn.created_at|date:"M d, Y" }} · {{ txn.gateway|default:"—" }}</p>
+        </div>
+
+        <!-- Credits -->
+        <div class="text-right">
+          <p class="text-sm font-mono font-700
+            {% if txn.transaction_type == 'topup' %}text-emerald-700{% else %}text-slate-600{% endif %}">
+            {% if txn.transaction_type == 'topup' %}+{% else %}-{% endif %}{{ txn.credits|floatformat:0 }} cr
+          </p>
+          {% if txn.amount_usd %}
+          <p class="text-xs text-slate-400 font-mono">${{ txn.amount_usd }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Status badge -->
+        <div class="flex-shrink-0">
+          {% if txn.status == 'completed' %}
+          <span class="text-xs bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-0.5 rounded-full font-600">Completed</span>
+          {% elif txn.status == 'pending' %}
+          <span class="text-xs shimmer-pending border border-amber-200 text-amber-700 px-2.5 py-0.5 rounded-full font-600">Pending</span>
+          {% else %}
+          <span class="text-xs bg-red-50 text-red-600 border border-red-100 px-2.5 py-0.5 rounded-full font-600">Failed</span>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="text-center py-12 text-slate-400">
+        <div class="text-4xl mb-3">💳</div>
+        <p class="text-sm">No transactions yet. Top up to get started!</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+<!-- otp_success.html -->
+<div class="text-center py-6">
+  <div class="w-16 h-16 rounded-full bg-emerald-100 border-4 border-emerald-500 flex items-center justify-center text-3xl mx-auto mb-5 shadow-glow">
+    ✅
+  </div>
+  <h2 class="font-display text-xl font-700 text-slate-900 mb-2">Account verified!</h2>
+  <p class="text-slate-500 text-sm mb-6">Welcome to FastOTP, {{ user.first_name|default:user.username }}. Your 5 free credits are ready.</p>
+  <a href="{% url 'dashboard' %}" class="btn-push inline-flex items-center gap-2 bg-emerald-600 text-white font-600 px-8 py-3 rounded-2xl hover:bg-emerald-700 shadow-glow transition-all">
+    Go to Dashboard →
+  </a>
+</div>
